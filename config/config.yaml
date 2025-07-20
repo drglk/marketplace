@@ -1,0 +1,13 @@
+env: "prod" #local, dev, prod
+
+http_server:
+  address: "0.0.0.0:8082"
+  timeout: 10s
+  idle_timeout: 60s
+
+cache:
+ session_ttl: 1h
+ documents_ttl: 10s
+
+file_storage:
+  path: "./static/images/"
