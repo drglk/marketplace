@@ -1,0 +1,181 @@
+openapi: 3.0.3
+info:
+  title: Marketplace API
+  version: 1.0.0
+  description: API сервиса объявлений
+
+servers:
+  - url: https://drglk.ru/api
+
+paths:
+  /register:
+    post:
+      summary: Регистрация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+      responses:
+        '201':
+          description: Успешная регистрация
+        '400':
+          description: Неверный формат данных
+        '500':
+          description: Внутренняя ошибка
+
+  /auth:
+    post:
+      summary: Аутентификация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Успешный вход
+        '401':
+          description: Неверные данные
+    delete:
+      summary: Выход пользователя (удаление сессии)
+      responses:
+        '200':
+          description: Сессия удалена
+        '401':
+          description: Неавторизован
+
+  /posts:
+    get:
+      summary: Получить список объявлений
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+        - name: minprice
+          in: query
+          schema:
+            type: integer
+        - name: maxprice
+          in: query
+          schema:
+            type: integer
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список объявлений
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsList'
+    head:
+      summary: Получить количество объявлений
+      responses:
+        '200':
+          description: Заголовки с количеством постов
+
+    post:
+      summary: Создать объявление
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                post:
+                  type: string
+                  description: JSON строка с данными поста
+                file_meta:
+                  type: string
+                  description: JSON строка с мета-данными файла
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Пост создан
+        '400':
+          description: Ошибка валидации
+        '415':
+          description: Неподдерживаемый формат файла
+        '500':
+          description: Внутренняя ошибка
+
+  /health:
+    get:
+      summary: Проверка статуса сервиса
+      responses:
+        '200':
+          description: OK
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UserRegister:
+      type: object
+      required: [login, password]
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+
+    UserLogin:
+      type: object
+      required: [login, password]
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        owner_login:
+          type: string
+        header:
+          type: string
+        text:
+          type: string
+        image_path:
+          type: string
+        price:
+          type: integer
+        is_owner:
+          type: boolean
+
+    PostsList:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            posts:
+              type: array
+              items:
+                $ref: '#/components/schemas/Post'
