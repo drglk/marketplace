@@ -5,7 +5,7 @@ info:
   description: API сервиса объявлений
 
 servers:
-  - url: https://drglk.ru/api
+  - url: https://localhost/api
 
 paths:
   /register:
